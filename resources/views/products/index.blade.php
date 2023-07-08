@@ -22,6 +22,10 @@
                         <thead class="bg-gray-50 dark:bg-gray-800">
                             <tr>
                                 <th scope="col" @class(["px-3 py-3.5 text-left text-sm font-semibold text-gray-900  dark:text-white"]) >
+                                    Imagem
+                                </th>
+
+                                <th scope="col" @class(["px-3 py-3.5 text-left text-sm font-semibold text-gray-900  dark:text-white"]) >
                                     Produtos
                                 </th>
 
@@ -37,6 +41,10 @@
                         <tbody class="bg-white divide-y divide-gray-200">
                             @foreach ($products as $product)
                                 <tr class="bg-white dark:bg-gray-700">
+                                    <td class="w-32 h-32 px-3 py-4 text-sm text-gray-500 whitespace-nowrap dark:text-white">
+                                        <img class="w-full" src="/images/no-image.png" alt="" />
+                                    </td>
+
                                     <td class="px-3 py-4 text-sm text-gray-500 whitespace-nowrap dark:text-white">
                                         {{ $product->name }}
                                     </td>
@@ -52,7 +60,7 @@
                                             class="px-4 py-2 m-2 text-white transition duration-500 bg-yellow-500 border border-yellow-500 rounded-md select-none ease hover:bg-yellow-600 focus:outline-none focus:shadow-outline"
                                         >
                                             Editar
-                                    </a>
+                                        </a>
 
                                         <form action="{{ route('produtos.destroy', $product->id) }}" id="form-{{$product->id}}" method="POST">
                                             @csrf
@@ -65,6 +73,15 @@
                                                 Excluir
                                             </button>
                                         </form>
+
+                                        <a href="{{ route('produtos.show', $product->id) }}" type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm p-2.5 text-center inline-flex items-center mr-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                              </svg>
+                                              
+                                            <span class="sr-only">Icon description</span>
+                                        </a>
                                     </td>
                                 </tr>
                                 @endforeach

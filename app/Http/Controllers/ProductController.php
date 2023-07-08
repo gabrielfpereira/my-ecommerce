@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreProductRequest;
 use App\Http\Requests\UpdateProductRequest;
+use App\Models\Category;
 use App\Models\Product;
 use Exception;
 use Illuminate\Http\Request;
@@ -26,7 +27,8 @@ class ProductController extends Controller
      */
     public function create()
     {
-        return view('products.create');
+        $categories = Category::all();
+        return view('products.create', compact('categories'));
     }
 
     /**
@@ -36,20 +38,32 @@ class ProductController extends Controller
     {
         $data = $request->validated();
         $data['price'] = (int) $data['price'];
-        // dd($data);
-        if(Product::create($data)){
-            return redirect()->route('produtos.index')->with('message', 'Produto cadastrado com sucesso!');
+        dd($data);
+        $product = Product::create($data);
+
+        if(!$product){
+            return redirect()->back()->with('error', 'erro ao cadastrar.');
         }
 
-        return redirect()->back()->with('error', 'erro ao cadastrar.');
+        $product->categories()->sync($data['categories']);
+
+        dd($product->categories);
+        
+        return redirect()->route('produtos.index')->with('message', 'Produto cadastrado com sucesso!');
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(Product $product)
+    public function show(Request $request, $product_id)
     {
-        //
+        $product = Product::findOrFail($product_id);
+
+        if(!$product){
+            dd('Deu erro');
+        }
+
+        return view('products.view', compact('product'));
     }
 
     /**
@@ -57,9 +71,10 @@ class ProductController extends Controller
      */
     public function edit(Request $request, $product_id)
     {
-        $product = Product::findORFail($product_id);
+        $product = Product::with('categories')->findORFail($product_id);
+        $categories = Category::all();
 
-        return view('products.edit', compact('product'));
+        return view('products.edit', compact('product', 'categories'));
     }
 
     /**
@@ -77,6 +92,7 @@ class ProductController extends Controller
         }
 
         $product->update($data);
+        $product->categories()->sync($data['categories']);
 
         return redirect()->route('produtos.index')->with('message', 'Produto atualizado!');
     }
