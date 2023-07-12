@@ -5,7 +5,9 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreProductRequest;
 use App\Http\Requests\UpdateProductRequest;
 use App\Models\Category;
+use App\Models\Image;
 use App\Models\Product;
+use App\Models\TemporaryImage;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
@@ -17,7 +19,7 @@ class ProductController extends Controller
      */
     public function index()
     {
-        $products = Product::orderBy('created_at','desc')->paginate(15);
+        $products = Product::with('images')->orderBy('created_at','desc')->paginate(15);
 
         return view('products.index', compact('products'));
     }
@@ -38,8 +40,17 @@ class ProductController extends Controller
     {
         $data = $request->validated();
         $data['price'] = (int) $data['price'];
-        dd($data);
+//        dd($data);
         $product = Product::create($data);
+        $temporyImage = TemporaryImage::where('folder', $request->images)->first();
+
+        if ($temporyImage){
+            $product
+                ->addMedia(storage_path('app/public/images/tmp/' . $temporyImage->folder . '/' . $temporyImage->filename))
+                ->toMediaCollection();
+            rmdir(storage_path('app/public/images/tmp/' . $temporyImage->folder));
+            $temporyImage->delete();
+        }
 
         if(!$product){
             return redirect()->back()->with('error', 'erro ao cadastrar.');
@@ -47,8 +58,8 @@ class ProductController extends Controller
 
         $product->categories()->sync($data['categories']);
 
-        dd($product->categories);
-        
+//        dd($product->categories);
+
         return redirect()->route('produtos.index')->with('message', 'Produto cadastrado com sucesso!');
     }
 
@@ -57,7 +68,7 @@ class ProductController extends Controller
      */
     public function show(Request $request, $product_id)
     {
-        $product = Product::findOrFail($product_id);
+        $product = Product::with('categories')->findOrFail($product_id);
 
         if(!$product){
             dd('Deu erro');
@@ -93,6 +104,16 @@ class ProductController extends Controller
 
         $product->update($data);
         $product->categories()->sync($data['categories']);
+
+        $temporyImage = TemporaryImage::where('folder', $request->images)->first();
+
+        if ($temporyImage){
+            $product
+                ->addMedia(storage_path('app/public/images/tmp/' . $temporyImage->folder . '/' . $temporyImage->filename))
+                ->toMediaCollection();
+            rmdir(storage_path('app/public/images/tmp/' . $temporyImage->folder));
+            $temporyImage->delete();
+        }
 
         return redirect()->route('produtos.index')->with('message', 'Produto atualizado!');
     }

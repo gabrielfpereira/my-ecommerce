@@ -31,6 +31,7 @@ Route::middleware('auth')->group(function () {
 
     Route::resource('/categorias', CategoryController::class);
     Route::resource('/produtos', ProductController::class);
+    Route::post('/upload', \App\Http\Controllers\UploadImageController::class);
 });
 
 require __DIR__.'/auth.php';
